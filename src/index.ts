@@ -1,11 +1,12 @@
+import bcryptjs from "bcryptjs";
+
 import { Hono } from 'hono';
-import { basicAuth } from 'hono/basic-auth'
 import { z } from 'zod'
 import { signIn, signUp } from './templates';
 
-import {drizzle} from "drizzle-orm/d1";
+import { drizzle } from "drizzle-orm/d1";
 import { users } from './db/schema';
-import { eq, sql, count, and } from 'drizzle-orm';
+import { eq, count, } from 'drizzle-orm';
 
 export interface Env {
   DB: D1Database
@@ -42,27 +43,31 @@ app.get('/login', (c) => {
   return c.html(signIn)
 })
 
-app.post('/signup',  async (c) => {
-  const rawFormData = await(c.req.parseBody())
+app.post('/signup', async (c) => {
+  const rawFormData = await (c.req.parseBody())
   const formStatus = signUpValidation.safeParse(rawFormData)
-  if(formStatus.success)  {
-    const {email, password} = formStatus.data;
+  if (formStatus.success) {
+    const { email, password } = formStatus.data;
+
+    // Hashing
 
     const db = drizzle(c.env.DB);
 
     try {
       // First check if any account exists
-      const Result = await db.select({count: count()}).from(users).where(eq(users.email, email));
-      const userCount = Result[0]?.count ?? 0; // Safely extract the count value
-      if(userCount>0)
+      const Result = await db.select({ count: count() }).from(users).where(eq(users.email, email));
+      const userCount = Result[0]?.count ?? 0;
+      if (userCount > 0)
         throw new Error("User already exists");
 
       // Else insert it in database
+      const hashPassword = await bcryptjs.hash(password, 12);
+
       await db.insert(users).values({
         email,
-        password
+        password: hashPassword
       });
-    }catch(err) {
+    } catch (err) {
       console.error(err);
       return c.redirect('/signup');
     }
@@ -76,21 +81,25 @@ app.post('/signup',  async (c) => {
 app.post('/login', async (c) => {
   const rawFormData = await c.req.parseBody();
   const formStatus = logInValidation.safeParse(rawFormData);
-  
-  
+
+
   if (formStatus.success) {
     const { email, password } = formStatus.data;
 
     const db = drizzle(c.env.DB);
     try {
-      const user = await db
+      const [user] = await db
         .select()
         .from(users)
-        .where(and(eq(users.email, email), eq(users.password, password)));
-  
-      if (user.length === 0) throw new Error("User already exists");
+        .where(eq(users.email, email));
 
-      return c.html(`<h1>You logged in successfully!</h1><p>Email: ${email}</p>`);
+      if (user === null) throw new Error("User already exists");
+
+      const isMatching = await bcryptjs.compare(password, user.password);
+
+      if (isMatching)
+        return c.html(`<h1>You logged in successfully!</h1><p>Email: ${email}</p>`);
+      else throw new Error("Invalid Credentials");
     } catch (err) {
       console.error(err);
       return c.redirect('/login');
