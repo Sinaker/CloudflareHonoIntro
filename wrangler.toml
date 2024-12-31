@@ -2,7 +2,6 @@
 name = "honopractice"
 main = "src/index.ts"
 compatibility_date = "2024-12-24"
-node_compat = true
 
 # Workers Logs
 # Docs: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
@@ -44,8 +43,8 @@ enabled = true
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#d1-databases
 [[d1_databases]]
 binding = "DB"
-database_name = "HonoPractice"
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+database_name = "hono-practice"
+database_id = "e382ebb0-8ecd-4655-b171-7b781571abab"
 migrations_dir = "drizzle/migrations"
 
 # Bind a dispatch namespace. Use Workers for Platforms to deploy serverless functions programmatically on behalf of your customers.

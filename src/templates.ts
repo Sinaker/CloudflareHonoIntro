@@ -98,14 +98,14 @@ export const signIn = `<!DOCTYPE html>
             <h2>Sign In</h2>
         </div>
         <div class="form">
-            <form action="/signin" method="POST">
+            <form action="/login" method="POST">
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="Enter your email" required />
+                    <input type="email" id="email" placeholder="Enter your email" name="email" required />
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Enter your password" required />
+                    <input type="password" id="password" placeholder="Enter your password" name="password" required />
                 </div>
                 <div class="form-group">
                     <button type="submit">Sign In</button>
@@ -238,7 +238,7 @@ export const signUp = `<!DOCTYPE html>
                 </div>
             </form>
             <div class="footer">
-                <p>Already have an account? <a href="/signin">Sign in</a></p>
+                <p>Already have an account? <a href="/login">Sign in</a></p>
             </div>
         </div>
     </div>
